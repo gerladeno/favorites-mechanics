@@ -1,0 +1,22 @@
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - "prefix(github.com/gerladeno/favorites-mechanics)"
+  varnamelen:
+    max-distance: 10
+
+linters:
+  enable-all: true
+  disable:
+    - golint
+    - interfacer
+    - ifshort
+    - maligned
+    - varcheck
+    - scopelint
+    - nosnakecase
+    - structcheck
+    - exhaustivestruct
+    - deadcode
