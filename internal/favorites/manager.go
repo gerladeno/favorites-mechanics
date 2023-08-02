@@ -31,6 +31,17 @@ type Manager struct {
 	maxID            int
 }
 
+type entry struct {
+	ID        int                       `yaml:"id"`
+	Name      string                    `yaml:"name"`
+	Exec      string                    `yaml:"exec"`
+	Parent    *list.DeLinkedList[entry] `yaml:"parent"`
+	Entries   *list.DeLinkedList[entry] `yaml:"entries"`
+	IsDir     bool                      `yaml:"isDir"`
+	CreatedAt time.Time                 `yaml:"createdAt"`
+	UpdatedAt time.Time                 `yaml:"updatedAt"`
+}
+
 func NewManager(ctx context.Context, log logger, opts Options) (*Manager, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, fmt.Errorf("opts.Validate(): %w", err)
@@ -96,27 +107,13 @@ func (m *Manager) notifySinker() {
 	}
 }
 
-func (m *Manager) AddDir(name string, parentID int, nextID int) {
-	if name == "" {
-		return
-	}
-
-	defer m.notifySinker()
-
-	dir := m.getDirByID(parentID)
-
-	next := m.getEntryByID(nextID)
-
-	dir.AddElement(m.newEntry(name, "", true), nil, next)
-}
-
 func (m *Manager) getDirByID(id int) *list.DeLinkedList[entry] {
 	e := m.getEntryByID(id)
 	if e == nil {
 		return m.root
 	}
 
-	return e.Value.entries
+	return e.Value.Entries
 }
 
 func (m *Manager) getEntryByID(id int) *list.Node[entry] {
@@ -133,28 +130,36 @@ func (m *Manager) getEntryByID(id int) *list.Node[entry] {
 }
 
 func (m *Manager) DisplayEntry(e entry) string {
-	if e.name != "" {
-		return e.name
+	if e.Name != "" {
+		return e.Name
 	}
 
-	if len(e.exec) <= m.opts.maxDisplayLen {
-		return e.exec
+	if len(e.Exec) <= m.opts.maxDisplayLen {
+		return e.Exec
 	}
 
-	return e.exec[:m.opts.maxDisplayLen-3] + "..."
+	return e.Exec[:m.opts.maxDisplayLen-3] + "..."
 }
 
-func (m *Manager) newEntry(name, exec string, isDir bool) entry {
+func (m *Manager) newEntry(name, exec string, isDir bool, parent *list.DeLinkedList[entry]) entry {
 	m.maxID++
-	e := entry{
-		id:        m.maxID,
-		name:      name,
-		exec:      exec,
-		entries:   nil,
-		isDir:     isDir,
-		createdAt: time.Now(),
-		updatedAt: time.Now(),
-	}
 
-	return e
+	return entry{
+		ID:        m.maxID,
+		Name:      name,
+		Exec:      exec,
+		Parent:    parent,
+		Entries:   nil,
+		IsDir:     isDir,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+}
+
+func (m *Manager) registerEntry(e *list.Node[entry]) {
+	m.entryIDs[e.Value.ID] = e
+}
+
+func (m *Manager) unregisterEntry(id int) {
+	delete(m.entryIDs, id)
 }

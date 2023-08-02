@@ -1,7 +1,7 @@
 package favorites
 
-func (m *Manager) AddCommand(name, exec string, parentID int, nextID int) {
-	if name == "" && exec == "" {
+func (m *Manager) AddDir(name string, parentID int, nextID int) {
+	if name == "" {
 		return
 	}
 
@@ -9,14 +9,18 @@ func (m *Manager) AddCommand(name, exec string, parentID int, nextID int) {
 
 	dir := m.getDirByID(parentID)
 	next := m.getEntryByID(nextID)
-	node := dir.AddElement(m.newEntry(name, exec, false, dir), nil, next)
+	node := dir.AddElement(m.newEntry(name, "", true, dir), nil, next)
 	m.registerEntry(node)
 }
 
-func (m *Manager) DeleteCommand(id int) {
+func (m *Manager) DeleteDir(id int) {
 	node := m.getEntryByID(id)
 	if node == nil {
 		return
+	}
+
+	for _, elem := range node.Value.Entries.List() {
+		m.unregisterEntry(elem.ID)
 	}
 
 	node.Value.Parent.DeleteElement(node)
