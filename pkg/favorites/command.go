@@ -9,7 +9,7 @@ func (m *Manager) AddCommand(name, exec string, parentID int, nextID int) {
 
 	dir := m.getDirByID(parentID)
 	next := m.getEntryByID(nextID)
-	node := dir.AddElement(m.newEntry(name, exec, false, dir), nil, next)
+	node := dir.AddElement(m.newEntry(name, exec, false, parentID), nil, next)
 	m.registerEntry(node)
 }
 
@@ -19,6 +19,20 @@ func (m *Manager) DeleteCommand(id int) {
 		return
 	}
 
-	node.Value.Parent.DeleteElement(node)
+	defer m.notifySinker()
+
+	dir := m.getDirByID(node.Value.ParentID)
+	dir.DeleteElement(node)
 	m.unregisterEntry(node.Value.ID)
+}
+
+func (m *Manager) ModifyExec(id int, exec string) {
+	node := m.getEntryByID(id)
+	if node == nil {
+		return
+	}
+
+	defer m.notifySinker()
+
+	node.Value.Exec = exec
 }

@@ -35,18 +35,10 @@ func NewOptions(
 
 func (o *Options) Validate() error {
 	errs := new(errors461e464ebed9.ValidationErrors)
-	errs.Add(errors461e464ebed9.NewValidationError("inMemory", _validate_Options_inMemory(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("configPath", _validate_Options_configPath(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("syncConfigPeriod", _validate_Options_syncConfigPeriod(o)))
 	errs.Add(errors461e464ebed9.NewValidationError("maxDisplayLen", _validate_Options_maxDisplayLen(o)))
 	return errs.AsError()
-}
-
-func _validate_Options_inMemory(o *Options) error {
-	if err := validator461e464ebed9.GetValidatorFor(o).Var(o.inMemory, "required"); err != nil {
-		return fmt461e464ebed9.Errorf("field `inMemory` did not pass the test: %w", err)
-	}
-	return nil
 }
 
 func _validate_Options_configPath(o *Options) error {

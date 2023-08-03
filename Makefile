@@ -7,12 +7,13 @@ gen:
 	go generate ./...
 
 lint:
+	go mod tidy
 	gofumpt -w .
 	gci write --custom-order -s standard -s default -s "prefix(github.com/gerladeno/favorites-mechanics)" .
 	golangci-lint run ./...
 
 test:
-	go test -v -count 10 -race ./...
+	go test -v -count 10 -race -coverprofile coverage ./...
 
 #build:
 

@@ -37,7 +37,7 @@ func TestDeLinkedList(t *testing.T) {
 	})
 
 	t.Run("add another after", func(t *testing.T) {
-		node := l.AddElement(5, l.Tail, nil)
+		node := l.AddElement(5, nil, nil)
 		require.Equal(t, []int{1, 2, 5}, l.List())
 		require.Equal(t, 3, l.Len())
 		require.Equal(t, 5, node.Value)
@@ -77,28 +77,58 @@ func TestDeLinkedList(t *testing.T) {
 		require.Equal(t, []int{4, 5, 3, 1, 2}, l.List())
 	})
 
+	t.Run("move first to last", func(t *testing.T) {
+		l.MoveItem(l.Head, l.Tail, nil)
+		require.Equal(t, []int{5, 3, 1, 2, 4}, l.List())
+	})
+
+	t.Run("move inner to first", func(t *testing.T) {
+		l.MoveItem(l.Tail.Prev, nil, l.Head)
+		require.Equal(t, []int{2, 5, 3, 1, 4}, l.List())
+	})
+
+	t.Run("move last to inner", func(t *testing.T) {
+		l.MoveItem(l.Tail, l.Head, nil)
+		require.Equal(t, []int{2, 4, 5, 3, 1}, l.List())
+	})
+
+	t.Run("move inner to last", func(t *testing.T) {
+		l.MoveItem(l.Head.Next.Next, l.Tail, nil)
+		require.Equal(t, []int{2, 4, 3, 1, 5}, l.List())
+	})
+
+	t.Run("move last to first", func(t *testing.T) {
+		l.MoveItem(l.Tail, nil, l.Head)
+		require.Equal(t, []int{5, 2, 4, 3, 1}, l.List())
+	})
+
+	t.Run("move inner to inner", func(t *testing.T) {
+		l.MoveItem(l.Head.Next, nil, l.Tail.Prev)
+		require.Equal(t, []int{5, 4, 2, 3, 1}, l.List())
+	})
+
 	t.Run("delete first", func(t *testing.T) {
 		l.DeleteElement(l.Head)
-		require.Equal(t, []int{5, 3, 1, 2}, l.List())
+		require.Equal(t, []int{4, 2, 3, 1}, l.List())
 		require.Equal(t, 4, l.Len())
 	})
 
 	t.Run("delete last", func(t *testing.T) {
 		l.DeleteElement(l.Tail)
-		require.Equal(t, []int{5, 3, 1}, l.List())
+		require.Equal(t, []int{4, 2, 3}, l.List())
 		require.Equal(t, 3, l.Len())
 	})
 
 	t.Run("delete the middle one", func(t *testing.T) {
 		l.DeleteElement(l.Head.Next)
-		require.Equal(t, []int{5, 1}, l.List())
+		require.Equal(t, []int{4, 3}, l.List())
 		require.Equal(t, 2, l.Len())
 	})
 
 	t.Run("delete one of the rest two", func(t *testing.T) {
 		l.DeleteElement(l.Head)
 		require.Equal(t, l.Head, l.Tail)
-		require.Equal(t, []int{1}, l.List())
+		require.Equal(t, []int{3}, l.List())
 		require.Equal(t, 1, l.Len())
 	})
 

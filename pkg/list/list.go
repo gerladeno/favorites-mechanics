@@ -25,61 +25,74 @@ func (l *DeLinkedList[T]) AddElement(value T, prev, next *Node[T]) *Node[T] {
 	case next != nil:
 		node = l.insertBefore(value, next)
 	}
+	l.len++
 
 	return node
 }
 
 func (l *DeLinkedList[T]) insertBefore(value T, next *Node[T]) *Node[T] {
 	node := Node[T]{
-		Prev:  next.Prev,
-		Next:  next,
 		Value: value,
 	}
 
-	if next.Prev != nil {
-		next.Prev.Next = &node
-	} else {
-		l.Head = &node
-	}
-
-	next.Prev = &node
-	l.len++
+	l.insertNodeBefore(&node, next)
 
 	return &node
+}
+
+func (l *DeLinkedList[T]) insertNodeBefore(node, next *Node[T]) {
+	node.Prev = next.Prev
+	node.Next = next
+
+	if next.Prev != nil {
+		next.Prev.Next = node
+	} else {
+		l.Head = node
+	}
+
+	next.Prev = node
 }
 
 func (l *DeLinkedList[T]) insertAfter(value T, prev *Node[T]) *Node[T] {
 	node := Node[T]{
-		Prev:  prev,
-		Next:  prev.Next,
 		Value: value,
 	}
 
-	if prev.Next != nil {
-		prev.Next.Prev = &node
-	} else {
-		l.Tail = &node
-	}
-
-	prev.Next = &node
-	l.len++
+	l.insertNodeAfter(&node, prev)
 
 	return &node
 }
 
+func (l *DeLinkedList[T]) insertNodeAfter(node, prev *Node[T]) {
+	node.Prev = prev
+	node.Next = prev.Next
+
+	if prev.Next != nil {
+		prev.Next.Prev = node
+	} else {
+		l.Tail = node
+	}
+
+	prev.Next = node
+}
+
 func (l *DeLinkedList[T]) insertLast(value T) *Node[T] {
 	node := Node[T]{Value: value}
-	l.Tail.Next = &node
-	l.Tail = &node
-	l.len++
+	l.insertNodeLast(&node)
 
 	return &node
+}
+
+func (l *DeLinkedList[T]) insertNodeLast(node *Node[T]) {
+	node.Prev = l.Tail
+	node.Next = nil
+	l.Tail.Next = node
+	l.Tail = node
 }
 
 func (l *DeLinkedList[T]) init(value T) *Node[T] {
 	l.Head = &Node[T]{Value: value}
 	l.Tail = l.Head
-	l.len++
 
 	return l.Head
 }
@@ -89,6 +102,11 @@ func (l *DeLinkedList[T]) DeleteElement(target *Node[T]) {
 		return
 	}
 
+	l.deleteElement(target)
+	l.len--
+}
+
+func (l *DeLinkedList[T]) deleteElement(target *Node[T]) {
 	if l.Head == target {
 		l.Head = target.Next
 	}
@@ -104,8 +122,6 @@ func (l *DeLinkedList[T]) DeleteElement(target *Node[T]) {
 	if target.Next != nil {
 		target.Next.Prev = target.Prev
 	}
-
-	l.len--
 }
 
 func (l *DeLinkedList[T]) Len() int {
@@ -158,4 +174,22 @@ func (l *DeLinkedList[T]) SwapItems(elem1, elem2 *Node[T]) {
 	} else {
 		l.Tail = elem2
 	}
+}
+
+func (l *DeLinkedList[T]) MoveItem(node, prev, next *Node[T]) *Node[T] {
+	switch {
+	case node == nil:
+		return node
+	case prev != nil:
+		l.deleteElement(node)
+		l.insertNodeAfter(node, prev)
+	case next != nil:
+		l.deleteElement(node)
+		l.insertNodeBefore(node, next)
+	case prev == nil && next == nil:
+		l.deleteElement(node)
+		l.insertNodeLast(node)
+	}
+
+	return node
 }
